@@ -7,6 +7,19 @@ from urllib.parse import urljoin, urlparse, unquote, parse_qs
 import json
 import time
 import random
+# import logging
+
+# Configure logging
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__name__)
+# class LoggingRetry(Retry):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+# 
+#     def increment(self, *args, **kwargs):
+#         reason = kwargs.get('reason', '')
+#         logger.debug(f"Retrying: {reason}")
+#         return super().increment(*args, **kwargs)
 
 def create_session():
     session = requests.Session()
@@ -454,54 +467,55 @@ def download_content(url, config):
     except requests.exceptions.RequestException as req_err:
         print(f"General error occurred: {req_err}")
 
-with open("code/profileconfig.json", "r") as f:
-    config = json.load(f)
-
-base_url = input("Please enter the Profile URL: ")
-
-all_posts = []
-
-session = create_session()
-page_number = 0
-while True:
-    if page_number == 0:
-        url = base_url
-    else:
-        url = f"{base_url}?o={page_number * 50}"
-
+def process_page(url, session, config):
     headers = {
         'User-Agent': user_agents,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5'
     }
-    
     try:
-        response = session.get(url, headers=headers, timeout=60)
+        response = session.get(url, headers=headers, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        if page_number == 0:
-            total_posts = get_total_posts(soup)
-            if total_posts:
-                total_pages = (total_posts + 49) // 50
-            else:
-                total_pages = 1
         post_cards = soup.find_all('article', class_='post-card post-card--preview')
         if not post_cards:
-            print(f"No more post cards found on page {page_number}. Ending pagination.")  # Debug print statement
-            break
+            return [], False
+        posts = []
         for post_card in post_cards:
-            post_info = extract_post_info(post_card, base_url)
-            all_posts.append(post_info)
-        if page_number >= total_pages - 1:
-            break
-        page_number += 1
-
-        # Sleep for a few seconds after processing each page to avoid DDoS-Guard
-        time.sleep(random.uniform(6, 18))
-
+            post_info = extract_post_info(post_card, url)
+            posts.append(post_info)
+            download_content(post_info['link'], config)
+        paginator = soup.find('div', class_='paginator')
+        if paginator:
+            next_page_link = paginator.find('a', class_='next')
+            has_next_page = next_page_link is not None
+        else:
+            has_next_page = False
+        return posts, has_next_page
     except requests.exceptions.RequestException as e:
-        print(f"Failed to retrieve page {page_number}: {e}")
-        break
+        logger.error(f"Failed to retrieve page: {e}")
+        return [], False
+
+with open("code/profileconfig.json", "r") as f:
+    config = json.load(f)
+
+base_url = input("Please enter the Profile URL: ")
+all_posts = []
+
+session = create_session()
+page_number = 0
+has_more_pages = True
+
+while has_more_pages:
+    url = f"{base_url}?o={page_number * 50}" if page_number > 0 else base_url
+    posts, has_more_pages = process_page(url, session, config)
+    if not posts:
+        print(f"No more post cards found on page {page_number}. Ending pagination.")
+        has_more_pages = False
+    else:
+        all_posts.extend(posts)
+        page_number += 1
+        time.sleep(random.uniform(2, 5))
 
 filtered_posts = []
 for post in all_posts:
@@ -514,8 +528,5 @@ for post in all_posts:
         filtered_posts.append(post)
 
 save_posts_to_file(filtered_posts)
-
-for post in filtered_posts:
-    download_content(post['link'], config)
 
 print(f"Information from {len(filtered_posts)} posts saved and content downloaded successfully!")
