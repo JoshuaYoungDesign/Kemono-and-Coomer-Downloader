@@ -101,8 +101,14 @@ def download_image(url, save_dir, post_id, config):
     if not config.get("no_folders", False):
         img_name = f"{post_id}_{img_name}"
     local_path = os.path.join(save_dir, img_name)
+    session = create_session()
+    headers = {
+        'User-Agent': user_agents,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+    }
     try:
-        response = requests.get(url, stream=True)
+        response = session.get(url, headers=headers, timeout=60, stream=True)
         response.raise_for_status()
         with open(local_path, 'wb') as file:
             file.write(response.content)
@@ -350,7 +356,7 @@ def download_content(url, config):
         'Accept-Language': 'en-US,en;q=0.5'
     }
     try:
-        response = session.get(url, headers=headers, timeout=60)
+        response = session.get(url, headers=headers, timeout=60, stream=True)
         response.raise_for_status()
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
