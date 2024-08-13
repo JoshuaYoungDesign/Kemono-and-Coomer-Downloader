@@ -155,7 +155,7 @@ def save_post_info(soup, post_path, post_id, config, base_url):
     if content_section:
         content_html = str(content_section)
         image_tags = content_section.find_all("img")
-        image_urls = [img['src'] for img in image_tags]
+        image_urls = [img['src'] for img in image_tags if 'src' in img.attrs]
 
         # Image downloading and mapping
         image_dir = post_path
@@ -195,9 +195,10 @@ def save_post_info(soup, post_path, post_id, config, base_url):
     for tag in thumbnail_tags:
         img_tag = tag.find("img")
         if img_tag:
-            src = img_tag["src"]
-            if src.startswith('//'):
-                src = 'https:' + src
+            src = img_tag.get("src")
+            if src:
+                if src.startswith('//'):
+                    src = 'https:' + src
             absolute_src = urljoin(base_url, src)
             fileThumb_url = tag.find("a", class_="fileThumb")["href"]
             fileThumb_filename = get_filename_from_url(fileThumb_url)
