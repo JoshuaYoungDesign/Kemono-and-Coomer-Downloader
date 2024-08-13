@@ -9,7 +9,6 @@ with open("code/config.json", "r") as f:
     config = json.load(f)
 
 download_attachments = config["download_attachments"]
-download_videos = config["download_videos"]
 save_info_txt = config["save_info_txt"]
 save_comments_txt = config["save_comments_txt"]
 
@@ -188,26 +187,6 @@ def baixar_conteudo(url):
                     f.write(attachment_response.content)
                 # Adding the URL to the set of downloaded links
                 links_baixados.add(attachment_url)
-
-    # Checking if the user wants to download videos
-    if download_videos:
-        # Finding video tags
-        video_tags = soup.find_all("a", class_="post__attachment-link")
-        # Iterating over video tags
-        for index, video_tag in enumerate(video_tags):
-            # Getting the video URL
-            video_url = video_tag["href"]
-            # Checking if the video has already been downloaded
-            if video_url not in links_baixados:
-                # Downloading the video
-                video_response = requests.get(video_url)
-                # Getting the file name
-                filename = video_tag["download"]
-                # Saving the video in the post folder
-                with open(os.path.join(post_path, filename), "wb") as f:
-                    f.write(video_response.content)
-                # Adding the URL to the set of downloaded links
-                links_baixados.add(video_url)
 
     print(f"Content from post {url} downloaded successfully!")
 

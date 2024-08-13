@@ -50,19 +50,16 @@ def configure_general_system():
     clear_console()
     print("General Post Download System Configuration:\n")
     print("1. Download Attachments:", "Enabled" if configurations.get('download_attachments', True) else "Disabled")
-    print("2. Download Videos:", "Enabled" if configurations.get('download_videos', True) else "Disabled")
-    print("3. Save Information:", "Enabled" if configurations.get('save_info_txt', True) else "Disabled")
-    print("4. Save Comments:", "Enabled" if configurations.get('save_comments_txt', True) else "Disabled")
+    print("2. Save Information:", "Enabled" if configurations.get('save_info_txt', True) else "Disabled")
+    print("3. Save Comments:", "Enabled" if configurations.get('save_comments_txt', True) else "Disabled")
 
     option = input("\nEnter the number of the option you want to configure or '0' to go back: ")
 
     if option == '1':
         configurations['download_attachments'] = not configurations.get('download_attachments', True)
     elif option == '2':
-        configurations['download_videos'] = not configurations.get('download_videos', True)
-    elif option == '3':
         configurations['save_info_txt'] = not configurations.get('save_info_txt', True)
-    elif option == '4':
+    elif option == '3':
         configurations['save_comments_txt'] = not configurations.get('save_comments_txt', True)
     elif option == '0':
         return
@@ -77,40 +74,37 @@ def configure_profile_system():
     clear_console()
     print("Profile Post Download System Configuration:\n")
     print("1. Download Attachments:", "Enabled" if configurations.get('download_attachments', True) else "Disabled")
-    print("2. Download Videos:", "Enabled" if configurations.get('download_videos', True) else "Disabled")
-    print("3. Save Information:", "Enabled" if configurations.get('save_info_txt', True) else "Disabled")
-    print("4. Save Comments:", "Enabled" if configurations.get('save_comments_txt', True) else "Disabled")
-    print("5. Save Only Posts with Files:", "Enabled" if configurations.get('files_only', False) else "Disabled")
-    print("6. Save Only Posts without Files:", "Enabled" if configurations.get('no_files', False) else "Disabled")
-    print("7. Save Both Types of Posts:", "Enabled" if configurations.get('both', True) else "Disabled")
-    print("8. Place Posts in Folders:", "Enabled" if configurations.get('no_folders', False) else "Disabled")
+    print("2. Save Information:", "Enabled" if configurations.get('save_info_txt', True) else "Disabled")
+    print("3. Save Comments:", "Enabled" if configurations.get('save_comments_txt', True) else "Disabled")
+    print("4. Save Only Posts with Files:", "Enabled" if configurations.get('files_only', False) else "Disabled")
+    print("5. Save Only Posts without Files:", "Enabled" if configurations.get('no_files', False) else "Disabled")
+    print("6. Save Both Types of Posts:", "Enabled" if configurations.get('both', True) else "Disabled")
+    print("7. Place Posts in Folders:", "Enabled" if configurations.get('no_folders', False) else "Disabled")
 
     option = input("\nEnter the number of the option you want to configure or '0' to go back: ")
 
     if option == '1':
         configurations['download_attachments'] = not configurations.get('download_attachments', True)
     elif option == '2':
-        configurations['download_videos'] = not configurations.get('download_videos', True)
-    elif option == '3':
         configurations['save_info_txt'] = not configurations.get('save_info_txt', True)
-    elif option == '4':
+    elif option == '3':
         configurations['save_comments_txt'] = not configurations.get('save_comments_txt', True)
-    elif option == '5':
+    elif option == '4':
         configurations['files_only'] = not configurations.get('files_only', False)
         if configurations['files_only']:
             configurations['no_files'] = False
             configurations['both'] = False
-    elif option == '6':
+    elif option == '5':
         configurations['no_files'] = not configurations.get('no_files', False)
         if configurations['no_files']:
             configurations['files_only'] = False
             configurations['both'] = False
-    elif option == '7':
+    elif option == '6':
         configurations['both'] = not configurations.get('both', True)
         if configurations['both']:
             configurations['files_only'] = False
             configurations['no_files'] = False
-    elif option == '8':
+    elif option == '7':
         configurations['no_folders'] = not configurations.get('no_folders', False)
     elif option == '0':
         return

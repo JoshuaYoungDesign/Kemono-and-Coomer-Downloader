@@ -434,25 +434,6 @@ def download_content(url, config):
                         downloaded_links.add(attachment_url)
                     except requests.exceptions.RequestException as e:
                         print(f"Failed to download attachment {attachment_url}: {e}")
-        if config.get("download_videos", False):
-            video_tags = soup.find_all("a", class_="post__attachment-link")
-            for video_tag in video_tags:
-                video_url = video_tag["href"]
-                filename = sanitize_filename(get_filename_from_url(video_url))
-                filename_with_id = f"{post_id}_{filename}" if not config.get("no_folders", False) else filename
-                file_path = os.path.join(post_path, filename_with_id)
-                file_path = truncate_path_if_long(file_path)
-                unique_filename = ensure_unique_filename(post_path, filename_with_id)
-                file_path = os.path.join(post_path, unique_filename)
-                if not os.path.exists(file_path):
-                    try:
-                        video_response = session.get(video_url, timeout=60)
-                        video_response.raise_for_status()
-                        with open(file_path, "wb") as f:
-                            f.write(video_response.content)
-                        downloaded_links.add(video_url)
-                    except requests.exceptions.RequestException as e:
-                        print(f"Failed to download video {video_url}: {e}")
         print(f"Post content from {url} successfully downloaded!")
     except requests.exceptions.ChunkedEncodingError as e:
         print(f"ChunkedEncodingError occurred: {e}")
